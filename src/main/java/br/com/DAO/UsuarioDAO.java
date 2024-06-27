@@ -1,6 +1,7 @@
 package br.com.DAO;
 
 import br.com.DTO.UsuarioDTO;
+import br.com.util.PasswordUtils;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -49,6 +50,39 @@ public class UsuarioDAO {
         }
     }
     
+    //validar login
+    public boolean validarLogin(String login, String senha) throws SQLException {
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        boolean isValid = false;
+        
+        try {
+            conn = Conexao.getConection();
+            
+            String sql = "SELECT login FROM usuario WHERE login = ? AND senha = ?";
+            stmt = conn.prepareStatement(sql);
+            
+            stmt.setString(1, login);
+            
+            rs = stmt.executeQuery();
+            if (rs.next()) {
+                String hashedPassword = rs.getString("senha");
+                isValid = PasswordUtils.verifyPassword(senha, hashedPassword); // Verifica se a senha corresponde ao hash
+            }
+        } finally {
+            // Fechar recursos (statement e conexão)
+            if (stmt != null) {
+                stmt.close();
+            }
+            if (conn != null) {
+                conn.close();
+            }
+        }
+        
+        return isValid;
+    }
+    
     private boolean verificaUsuarioExistente(String login, String email) throws SQLException{
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -70,12 +104,16 @@ public class UsuarioDAO {
                 existeUsuario = true;
             }
         } finally {
-            // Fechar recursos (statement e conexão)
+            // Fechar recursos (statement, result e conexão)
             if (stmt != null) {
                 stmt.close();
             }
             if (conn != null) {
                 conn.close();
+            }
+            
+            if (rs != null) {
+                rs.close();
             }
         }
         
@@ -136,5 +174,42 @@ public class UsuarioDAO {
             }
         }
     }
+
+    public String obterHashSenha(String login) throws SQLException {
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        String hashSenha = null;
+
+        try {
+            conn = Conexao.getConection(); // Obter conexão com o banco de dados
+            String sql = "SELECT senha FROM usuario WHERE login = ?";
+            stmt = conn.prepareStatement(sql);
+            stmt.setString(1, login);
+
+            rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                hashSenha = rs.getString("senha");
+            }
+        } catch (SQLException e) {
+            // Tratar exceções ou repassar para quem chamou o método
+            throw new SQLException("Erro ao buscar hash da senha", e);
+        } finally {
+            // Fechar recursos (ResultSet, PreparedStatement e conexão)
+            if (rs != null) {
+                rs.close();
+            }
+            if (stmt != null) {
+                stmt.close();
+            }
+            if (conn != null) {
+                conn.close();
+            }
+        }
+
+        return hashSenha;
+    }
+
 }
 
