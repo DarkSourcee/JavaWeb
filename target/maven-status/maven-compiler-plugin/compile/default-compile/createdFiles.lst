@@ -1,0 +1,6 @@
+br\com\DAO\UsuarioDAO.class
+br\com\servlet\UsuarioServlet.class
+br\com\DAO\Conexao.class
+br\com\DTO\UsuarioDTO.class
+com\mycompany\mavenproject_web\JakartaRestConfiguration.class
+com\mycompany\mavenproject_web\resources\JakartaEE10Resource.class
