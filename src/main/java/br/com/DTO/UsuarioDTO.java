@@ -15,6 +15,13 @@ public class UsuarioDTO {
         this.senha = senha;
     }
     
+    public UsuarioDTO(int id, String nome, String email, String login) {
+        this.id = id;
+        this.nome = nome;
+        this.email = email;
+        this.login = login;
+    }
+    
     public UsuarioDTO(int id) {
         this.id = id;
     }

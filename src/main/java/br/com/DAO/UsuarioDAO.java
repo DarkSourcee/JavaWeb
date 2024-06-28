@@ -6,6 +6,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.mindrot.jbcrypt.BCrypt;
@@ -41,12 +43,7 @@ public class UsuarioDAO {
             }
         } finally {
             // Fechar recursos (statement e conexão)
-            if (stmt != null) {
-                stmt.close();
-            }
-            if (conn != null) {
-                conn.close();
-            }
+            Conexao.closeConnection(conn, stmt);
         }
     }
     
@@ -72,12 +69,7 @@ public class UsuarioDAO {
             }
         } finally {
             // Fechar recursos (statement e conexão)
-            if (stmt != null) {
-                stmt.close();
-            }
-            if (conn != null) {
-                conn.close();
-            }
+            Conexao.closeConnection(conn, stmt);
         }
         
         return isValid;
@@ -105,16 +97,7 @@ public class UsuarioDAO {
             }
         } finally {
             // Fechar recursos (statement, result e conexão)
-            if (stmt != null) {
-                stmt.close();
-            }
-            if (conn != null) {
-                conn.close();
-            }
-            
-            if (rs != null) {
-                rs.close();
-            }
+            Conexao.closeConnection(conn, stmt, rs);
         }
         
         return existeUsuario;
@@ -135,12 +118,7 @@ public class UsuarioDAO {
             stmt.executeUpdate();
         } finally {
             // Fechar recursos (statement e conexão)
-            if (stmt != null) {
-                stmt.close();
-            }
-            if (conn != null) {
-                conn.close();
-            }
+            Conexao.closeConnection(conn, stmt);
         }
     }
     
@@ -166,13 +144,39 @@ public class UsuarioDAO {
             stmt.executeUpdate();
         } finally {
             // Fechar recursos (statement e conexão)
-            if (stmt != null) {
-                stmt.close();
-            }
-            if (conn != null) {
-                conn.close();
-            }
+            Conexao.closeConnection(conn, stmt);
         }
+    }
+    
+    public List<UsuarioDTO> listarUsuarios() throws SQLException {
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        List<UsuarioDTO> usuarios = new ArrayList<>();
+        
+        try {
+            conn = Conexao.getConection(); // Ajuste aqui para obter a conexão corretamente
+            String sql = "SELECT id, nome, email, login FROM usuario";
+            stmt = conn.prepareStatement(sql);
+            rs = stmt.executeQuery();
+            
+            while (rs.next()) {
+                Integer id = rs.getInt("id");
+                String nome = rs.getString("nome");
+                String email = rs.getString("email");
+                String login = rs.getString("login");
+                
+                UsuarioDTO usuario = new UsuarioDTO(id, nome, email, login);
+                usuarios.add(usuario);
+            }
+            
+        } catch(SQLException e) {
+            throw new SQLException("Erro ao listar usuários", e);
+        } finally {
+            Conexao.closeConnection(conn, stmt, rs); // Ajuste aqui para fechar a conexão corretamente
+        }
+        
+        return usuarios;
     }
 
     public String obterHashSenha(String login) throws SQLException {
