@@ -72,21 +72,26 @@ public class UsuarioServlet extends HttpServlet {
             // Obtém o hash da senha armazenado no banco de dados para o usuário com o login fornecido
             String hashSenhaArmazenada = usuarioDAO.obterHashSenha(login);
 
-            // Verifica se a senha fornecida pelo usuário corresponde ao hash armazenado no banco de dados
-            boolean senhaCorreta = PasswordUtils.verifyPassword(senha, hashSenhaArmazenada);
+            if (hashSenhaArmazenada != null) {
+                // Verifica se a senha fornecida pelo usuário corresponde ao hash armazenado no banco de dados
+                boolean senhaCorreta = PasswordUtils.verifyPassword(senha, hashSenhaArmazenada);
 
-            if (senhaCorreta) {
-                // Login válido, redireciona para a página inicial (ou outra página desejada)
-                response.sendRedirect(request.getContextPath() + "/index.html");
+                if (senhaCorreta) {
+                    // Login válido, redireciona para a página inicial (ou outra página desejada)
+                    response.sendRedirect(request.getContextPath() + "/index.html");
+                } else {
+                    // Senha incorreta, retorna uma mensagem de erro para o usuário
+                    response.getWriter().println("Credenciais inválidas. Verifique seu login e senha.");
+                }
             } else {
-                // Login inválido, retorna uma mensagem de erro para o usuário
-                request.setAttribute("mensagemErro", "Credenciais inválidas. Verifique seu login e senha.");
-                request.getRequestDispatcher("frm_login").forward(request, response);
+                // Hash de senha não encontrado no banco de dados
+                response.getWriter().println("Usuário não encontrado ou credenciais inválidas.");
             }
         } catch (SQLException e) {
             throw new ServletException("Erro ao validar login", e);
         }
     }
+
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
