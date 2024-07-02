@@ -19,16 +19,28 @@ import java.util.logging.Logger;
  * @author marcelo.paula
  */
 @WebServlet(name = "cadastroUsuario", urlPatterns = {"/view_usuario/cadastroUsuario",
-                                                     "/view_usuario/login"})
+                                                     "/view_usuario/login",
+                                                     "/view_usuario/frm_listagem",
+                                                     "/view_usuario/frm_cadastrar_usuario"})
 public class UsuarioServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         // Lógica para lidar com requisições GET
-        PrintWriter out = response.getWriter();
-        out.println("<html><body>");
-        out.println("<h1>Método GET foi chamado</h1>");
-        out.println("</body></html>");
+        
+        String action = request.getServletPath();
+        
+         switch (action) {
+            case "/view_usuario/frm_listagem":
+                response.sendRedirect(request.getContextPath() + "/view_usuario/frm_listagem.jsp");
+                break;
+            case "/view_usuario/frm_cadastrar_usuario":
+                response.sendRedirect(request.getContextPath() + "/view_usuario/frm_cadastro_usuario.jsp");
+                break;
+            default:
+                response.sendRedirect(request.getContextPath() + "/index.html");
+                break;
+         }        
     }
     
     private void cadastrarUsuario(HttpServletRequest request, HttpServletResponse response)
@@ -51,10 +63,12 @@ public class UsuarioServlet extends HttpServlet {
         try {
             try {
                 usuarioDAO.cadastrarUsuario(usuarioDTO);
+                request.setAttribute("mensagemSucesso", "Usuário cadastrado com sucesso!");
             } catch (SQLException ex) {
                 Logger.getLogger(UsuarioServlet.class.getName()).log(Level.SEVERE, null, ex);
+                request.setAttribute("mensagemErro", "Erro ao cadastrar usuário: " + ex.getMessage());
             }
-            response.getWriter().println("Usuário cadastrado com sucesso!");
+            //response.getWriter().println("Usuário cadastrado com sucesso!");
         } catch (ClassNotFoundException e) {
             throw new ServletException("Erro ao cadastrar usuário", e);
         }
@@ -156,7 +170,7 @@ public class UsuarioServlet extends HttpServlet {
         UsuarioDAO usuarioDAO = new UsuarioDAO();
         try {
             try {
-                usuarioDAO.editarUsuario(usuarioDTO);
+                usuarioDAO.deletarUsuario(usuarioDTO);
             } catch (SQLException ex) {
                 Logger.getLogger(UsuarioServlet.class.getName()).log(Level.SEVERE, null, ex);
             }

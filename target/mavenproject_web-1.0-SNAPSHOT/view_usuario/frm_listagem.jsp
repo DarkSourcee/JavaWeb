@@ -15,9 +15,13 @@
 <body>
     <div class="container mt-5">
         <h2>Lista de Usuários</h2>
+        <a href="frm_cadastrar_usuario">
+            <button type="button" class="btn btn-primary btn-sm">Novo usuário</button>
+        </a>
         <table class="table table-striped">
             <thead>
                 <tr>
+                    <th scope="col">ID</th>
                     <th scope="col">Nome</th>
                     <th scope="col">Email</th>
                     <th scope="col">Login</th>
@@ -31,6 +35,7 @@
                         for (UsuarioDTO usuario : usuarios) {
                 %>
                 <tr>
+                    <td><%= usuario.getId() %></td>
                     <td><%= usuario.getNome() %></td>
                     <td><%= usuario.getEmail() %></td>
                     <td><%= usuario.getLogin() %></td>
@@ -52,9 +57,12 @@
     </div>
             
     <script>
-        // Função para deletar usuário
+        // Função para deletar um usuário pelo ID
         function deletarUsuario(idUsuario) {
-            const url = '/view_usuario/cadastroUsuario?id=' + idUsuario;
+            // Endpoint do servidor que lida com a exclusão de usuários
+            const url = 'cadastroUsuario?id=' + idUsuario;
+
+            // Opções da requisição HTTP DELETE
             const requestOptions = {
                 method: 'DELETE',
                 headers: {
@@ -62,19 +70,38 @@
                 }
             };
 
+            // Realiza a requisição para o servidor
             fetch(url, requestOptions)
                 .then(response => {
+                    // Obtém o tipo de conteúdo da resposta
+                    const contentType = response.headers.get('content-type');
+
+                    // Se a resposta não for OK, processa o erro
                     if (!response.ok) {
-                        throw new Error('Erro ao deletar usuário');
+                        if (contentType && contentType.includes('application/json')) {
+                            // Se for JSON, retorna o erro em formato JSON
+                            return response.json().then(json => { throw new Error(json.message) });
+                        } else {
+                            // Se não for JSON, retorna o erro como texto
+                            return response.text().then(text => { throw new Error(text) });
+                        }
                     }
+                    // Se a resposta for OK, retorna o corpo da resposta em formato JSON
                     return response.json();
                 })
                 .then(data => {
+                    // Log de sucesso e atualização da interface do usuário
                     console.log('Usuário deletado com sucesso:', data);
-                    location.reload();
+                    // Por exemplo, remover a linha da tabela correspondente ao usuário deletado
+                    document.querySelector(`#usuario-${idUsuario}`).remove();
+                    window.location.reload();
                 })
                 .catch(error => {
+                    // Log de erro
                     console.error('Erro ao deletar usuário:', error);
+                    // Exibe uma mensagem de erro para o usuário
+                    alert('Erro ao deletar usuário: ' + error.message);
+                    window.location.reload();
                 });
         }
 

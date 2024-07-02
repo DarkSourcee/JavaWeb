@@ -106,16 +106,26 @@ public class UsuarioDAO {
     public void deletarUsuario(UsuarioDTO usuario) throws ClassNotFoundException, SQLException {
         Connection conn = null;
         PreparedStatement stmt = null;
-        
+
         try {
             conn = Conexao.getConection();
-            
+
             String sql = "DELETE FROM usuario WHERE id = ?";
             stmt = conn.prepareStatement(sql);
-            
+
             stmt.setInt(1, usuario.getId());
-            
-            stmt.executeUpdate();
+
+            int rowsAffected = stmt.executeUpdate();
+
+            if (rowsAffected > 0) {
+                System.out.println("Usuário deletado com sucesso!");
+            } else {
+                System.out.println("Nenhum usuário foi deletado. Verifique o ID.");
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw e; // rethrow the exception to be handled elsewhere
         } finally {
             // Fechar recursos (statement e conexão)
             Conexao.closeConnection(conn, stmt);
@@ -201,15 +211,7 @@ public class UsuarioDAO {
             throw new SQLException("Erro ao buscar hash da senha", e);
         } finally {
             // Fechar recursos (ResultSet, PreparedStatement e conexão)
-            if (rs != null) {
-                rs.close();
-            }
-            if (stmt != null) {
-                stmt.close();
-            }
-            if (conn != null) {
-                conn.close();
-            }
+            Conexao.closeConnection(conn, stmt, rs);
         }
 
         return hashSenha;
