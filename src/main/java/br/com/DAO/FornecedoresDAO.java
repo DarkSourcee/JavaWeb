@@ -73,7 +73,7 @@ public class FornecedoresDAO {
         
         Connection conn = null;
         PreparedStatement stmt = null;
-        Resultset rs = null;
+        ResultSet rs = null;
         
         try {
             conn = Conexao.getConection();

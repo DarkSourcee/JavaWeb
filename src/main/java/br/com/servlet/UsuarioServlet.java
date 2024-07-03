@@ -21,14 +21,27 @@ import java.util.logging.Logger;
 @WebServlet(name = "cadastroUsuario", urlPatterns = {"/view_usuario/cadastroUsuario",
                                                      "/view_usuario/login",
                                                      "/view_usuario/frm_listagem",
-                                                     "/view_usuario/frm_cadastrar_usuario"})
+                                                     "/view_usuario/frm_cadastrar_usuario",
+                                                     "/view_usuario/frm_editar"})
 public class UsuarioServlet extends HttpServlet {
+    private String rota;
+
+    public UsuarioServlet() {
+        this.rota = null;
+    }
+    
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         // Lógica para lidar com requisições GET
         
-        String action = request.getServletPath();
+        String action = null;
+        
+        if (this.rota == null) {
+            action = request.getServletPath();
+        } else {
+            action = request.getServletPath() + "view_usuario/frm_login.jsp";
+        }
         
          switch (action) {
             case "/view_usuario/frm_listagem":
@@ -36,6 +49,10 @@ public class UsuarioServlet extends HttpServlet {
                 break;
             case "/view_usuario/frm_cadastrar_usuario":
                 response.sendRedirect(request.getContextPath() + "/view_usuario/frm_cadastro_usuario.jsp");
+                break;
+            case "/view_usuario/frm_editar":
+                String id = request.getParameter("id");
+                response.sendRedirect(request.getContextPath() + "/view_usuario/frm_editar.jsp?id="+id);
                 break;
             default:
                 response.sendRedirect(request.getContextPath() + "/index.html");
@@ -64,6 +81,8 @@ public class UsuarioServlet extends HttpServlet {
             try {
                 usuarioDAO.cadastrarUsuario(usuarioDTO);
                 request.setAttribute("mensagemSucesso", "Usuário cadastrado com sucesso!");
+                this.rota = "/view_usuario/frm_login.jsp";
+                doGet(request, response);
             } catch (SQLException ex) {
                 Logger.getLogger(UsuarioServlet.class.getName()).log(Level.SEVERE, null, ex);
                 request.setAttribute("mensagemErro", "Erro ao cadastrar usuário: " + ex.getMessage());
@@ -119,6 +138,8 @@ public class UsuarioServlet extends HttpServlet {
             case "/view_usuario/login":
                 realizarLogin(request, response);
                 break;
+            case "/view_usuario/frm_editar":
+                doPut(request, response);
             default:
                 break;
          }

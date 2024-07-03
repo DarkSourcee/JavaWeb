@@ -158,6 +158,37 @@ public class UsuarioDAO {
         }
     }
     
+    public List<UsuarioDTO> encontrarUsuario(Integer p_id) throws SQLException {
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        List<UsuarioDTO> usuarios = new ArrayList<>();
+        
+        try {
+            conn = Conexao.getConection(); // Ajuste aqui para obter a conexão corretamente
+            String sql = "SELECT id, nome, email, login, senha FROM usuario WHERE id = ?";
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, p_id);
+            rs = stmt.executeQuery();
+            
+            while (rs.next()) {
+                Integer id = p_id;
+                String nome = rs.getString("nome");
+                String email = rs.getString("email");
+                String login = rs.getString("login");
+                String senha = rs.getString("senha");
+                
+                UsuarioDTO usuario = new UsuarioDTO(id, nome, email, login, senha);
+                usuarios.add(usuario);
+            }
+        } catch (SQLException e) {
+            throw new SQLException("Erro ao listar usuários", e);
+        } finally {
+            Conexao.closeConnection(conn, stmt, rs);
+        }
+        return usuarios;
+    }
+    
     public List<UsuarioDTO> listarUsuarios() throws SQLException {
         Connection conn = null;
         PreparedStatement stmt = null;

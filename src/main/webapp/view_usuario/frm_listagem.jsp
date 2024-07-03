@@ -41,7 +41,7 @@
                     <td><%= usuario.getLogin() %></td>
                     <td>
                         <!-- Botões de ação -->
-                        <button type="button" class="btn btn-primary btn-sm">Atualizar</button>
+                        <button type="button" onclick="atualizarUsuario(<%= usuario.getId() %>)" class="btn btn-primary btn-sm">Atualizar</button>
                         <button type="button" onclick="deletarUsuario(<%= usuario.getId() %>)" class="btn btn-danger btn-sm">Deletar</button>
                     </td>
                 </tr>
@@ -57,6 +57,13 @@
     </div>
             
     <script>
+        function atualizarUsuario(idUsuario) {
+            // Endpoint do servidor que lida com a exclusão de usuários
+            const url = 'frm_editar?id=' + idUsuario;
+
+            window.location.href = url;
+        }
+        
         // Função para deletar um usuário pelo ID
         function deletarUsuario(idUsuario) {
             // Endpoint do servidor que lida com a exclusão de usuários

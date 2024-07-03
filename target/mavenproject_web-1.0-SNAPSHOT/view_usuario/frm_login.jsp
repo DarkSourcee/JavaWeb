@@ -33,11 +33,20 @@
                             </div>
                             <button type="submit" class="btn btn-success">Login</button>
                             <button type="reset" class="btn btn-danger">Limpar</button>
+                            <span>
+                                Ainda não cadastrado? <a href="javascript:void(0);" onclick="toUrl();"><strong>Cadastra-se</strong></a>
+                            </span>
                         </form>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    
+    <script>
+        function toUrl() {
+            window.location.href = "frm_cadastrar_usuario";
+        }
+    </script>
 </body>
 </html>

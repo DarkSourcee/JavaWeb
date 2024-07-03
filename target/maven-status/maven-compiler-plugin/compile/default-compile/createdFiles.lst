@@ -1,3 +1,5 @@
+br\com\servlet\FornecedoresServlet.class
+br\com\DAO\FornecedoresDAO.class
 br\com\DAO\UsuarioDAO.class
 br\com\servlet\UsuarioServlet.class
 br\com\DAO\Conexao.class
@@ -5,3 +7,4 @@ br\com\DTO\UsuarioDTO.class
 br\com\util\PasswordUtils.class
 com\mycompany\mavenproject_web\JakartaRestConfiguration.class
 com\mycompany\mavenproject_web\resources\JakartaEE10Resource.class
+br\com\DTO\FornecedoresDTO.class
