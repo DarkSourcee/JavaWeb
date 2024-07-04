@@ -135,58 +135,75 @@ public class UsuarioDAO {
     public void editarUsuario(UsuarioDTO usuario) throws ClassNotFoundException, SQLException {
         Connection conn = null;
         PreparedStatement stmt = null;
-        
+
         try {
             conn = Conexao.getConection();  // Obter conexão com o banco de dados
-            String sql = "update usuario set nome = ?, email = ?, login = ?, senha = ? where id = ?";
-            stmt = conn.prepareStatement(sql);
-            
-            String senhaCriptografada = BCrypt.hashpw(usuario.getSenha(), BCrypt.gensalt());
-            
-            // Setar os parâmetros da query
-            stmt.setString(1, usuario.getNome());
-            stmt.setString(2, usuario.getEmail());
-            stmt.setString(3, usuario.getLogin());
-            stmt.setString(4, senhaCriptografada);
-            stmt.setInt(5, usuario.getId());
-            
-            // Executar a query de inserção
+
+            // Verifica se a senha foi fornecida para decidir se atualiza ou não
+            if (usuario.getSenha() != null && !usuario.getSenha().isEmpty()) {
+                // Se a senha foi fornecida, criptografa-a antes de atualizar
+                String sql = "update usuario set nome = ?, email = ?, login = ?, senha = ? where id = ?";
+                stmt = conn.prepareStatement(sql);
+
+                String senhaCriptografada = BCrypt.hashpw(usuario.getSenha(), BCrypt.gensalt());
+
+                // Setar os parâmetros da query com a senha criptografada
+                stmt.setString(1, usuario.getNome());
+                stmt.setString(2, usuario.getEmail());
+                stmt.setString(3, usuario.getLogin());
+                stmt.setString(4, senhaCriptografada);
+                stmt.setInt(5, usuario.getId());
+            } else {
+                // Se a senha não foi fornecida, atualiza apenas os outros campos
+                String sql = "update usuario set nome = ?, email = ?, login = ? where id = ?";
+                stmt = conn.prepareStatement(sql);
+
+                // Setar os parâmetros da query sem a senha
+                stmt.setString(1, usuario.getNome());
+                stmt.setString(2, usuario.getEmail());
+                stmt.setString(3, usuario.getLogin());
+                stmt.setInt(4, usuario.getId());
+            }
+
+            // Executar a query de atualização
             stmt.executeUpdate();
         } finally {
             // Fechar recursos (statement e conexão)
             Conexao.closeConnection(conn, stmt);
         }
     }
+
     
-    public List<UsuarioDTO> encontrarUsuario(Integer p_id) throws SQLException {
+    //função para encontrar um usuário e editar
+    public UsuarioDTO encontrarUsuario(int p_id) throws SQLException {
         Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        List<UsuarioDTO> usuarios = new ArrayList<>();
-        
+        UsuarioDTO usuario = null;
+
         try {
             conn = Conexao.getConection(); // Ajuste aqui para obter a conexão corretamente
             String sql = "SELECT id, nome, email, login, senha FROM usuario WHERE id = ?";
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, p_id);
             rs = stmt.executeQuery();
-            
-            while (rs.next()) {
-                Integer id = p_id;
+
+            if (rs.next()) {
+                Integer id = rs.getInt("id");
                 String nome = rs.getString("nome");
                 String email = rs.getString("email");
                 String login = rs.getString("login");
                 String senha = rs.getString("senha");
-                
-                UsuarioDTO usuario = new UsuarioDTO(id, nome, email, login, senha);
-                usuarios.add(usuario);
+
+                usuario = new UsuarioDTO(id, nome, email, login, senha);
             }
         } catch (SQLException e) {
-            throw new SQLException("Erro ao listar usuários", e);
+            throw new SQLException("Erro ao encontrar usuário", e);
         } finally {
             Conexao.closeConnection(conn, stmt, rs);
         }
-        return usuarios;
+
+        return usuario;
     }
     
     public List<UsuarioDTO> listarUsuarios() throws SQLException {
